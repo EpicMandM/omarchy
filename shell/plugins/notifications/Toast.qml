@@ -540,8 +540,9 @@ Item {
                 leftMargin: plate.borderLeft; rightMargin: plate.borderRight
                 bottomMargin: plate.borderBottom }
 
-      readonly property bool shown: card.replying
-                                    || card.allDeeds.length > 0 && (card.expanded ? card.hovered : card.place.front)
+      // On hover only: showing them on the front card at rest fed their
+      // height back into the layout that picks the front, and they flickered.
+      readonly property bool shown: card.replying || card.allDeeds.length > 0 && card.hovered
       readonly property int columns: Math.max(1, Math.min(3, card.allDeeds.length))
       readonly property int rows: Math.ceil(card.allDeeds.length / columns)
       readonly property real rule: 1
