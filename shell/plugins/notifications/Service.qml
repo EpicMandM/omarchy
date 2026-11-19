@@ -1580,8 +1580,19 @@ Item {
       WlrLayershell.layer: WlrLayer.Overlay
       readonly property bool takesKeyboard: (service.keyboardMode || service.replyKey !== "")
                                             && service.targetDisplayName === String(modelData.name)
-      WlrLayershell.keyboardFocus: takesKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+      // A reply holds a focus grab rather than exclusive focus: clicking any
+      // other window clears it, ending the reply and giving that window the keyboard.
+      readonly property bool replyingHere: takesKeyboard && service.replyKey !== ""
+      WlrLayershell.keyboardFocus: !takesKeyboard ? WlrKeyboardFocus.None
+                                   : replyingHere ? WlrKeyboardFocus.OnDemand
+                                   : WlrKeyboardFocus.Exclusive
       exclusionMode: ExclusionMode.Ignore
+
+      HyprlandFocusGrab {
+        active: surface.replyingHere
+        windows: [surface]
+        onCleared: service.stopReply()
+      }
 
       // Constant width and full height, so the buffer is allocated once.
       anchors { top: true; bottom: true; right: true }
