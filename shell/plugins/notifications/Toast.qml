@@ -77,10 +77,8 @@ Item {
   signal replySubmitted(string text)
   signal replyCancelled()
   signal replyTyped()
-  onReplyingChanged: {
-    if (replying) Qt.callLater(function() { replyInput.forceActiveFocus() })
-    else replyInput.text = ""
-  }
+  // The draft outlives a lost focus; Enter and Escape clear it.
+  onReplyingChanged: if (replying) Qt.callLater(function() { replyInput.forceActiveFocus() })
 
   readonly property bool critical: row.urgency === 2
   readonly property color dimColor: Qt.darker(Commons.Color.notifications.text, 1.4)
@@ -163,7 +161,8 @@ Item {
   // time, and gets a fresh display period of its own duration. Its picture
   // may be new at the same path, so the image is read again too.
   property real remaining: Number(row.duration || 0)
-  readonly property bool ticking: Number(row.duration || 0) > 0 && !paused
+  // A card holding a reply draft waits, like one being replied to.
+  readonly property bool ticking: Number(row.duration || 0) > 0 && !paused && !replyInput.text
   readonly property string arrival: String(row.ts) + ":" + String(row.duration)
   property bool reloading: false
   onArrivalChanged: {
